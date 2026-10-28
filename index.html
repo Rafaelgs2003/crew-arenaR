@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista de tareas</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <header class="app__header">
+      <h1>Mis tareas</h1>
+      <p class="app__counter" id="counter">0 pendientes</p>
+    </header>
+
+    <form id="task-form" class="task-form" autocomplete="off">
+      <input type="text" id="task-input" placeholder="Escribe una nueva tarea…" maxlength="200" required>
+      <button type="submit">Añadir</button>
+    </form>
+
+    <details class="filters">
+      <summary>Filtrar tareas</summary>
+      <div class="filters__options" role="radiogroup" aria-label="Filtro de tareas">
+        <label><input type="radio" name="filter" value="all" checked> Todas</label>
+        <label><input type="radio" name="filter" value="pending"> Pendientes</label>
+        <label><input type="radio" name="filter" value="done"> Completadas</label>
+      </div>
+    </details>
+
+    <ul id="task-list" class="task-list" aria-live="polite"></ul>
+
+    <p id="empty-message" class="empty" hidden>No hay tareas aquí todavía.</p>
+
+    <footer class="app__footer">
+      <button type="button" id="clear-done">Borrar completadas</button>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
