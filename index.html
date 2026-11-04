@@ -7,39 +7,44 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="game">
-    <header class="game__header">
-      <h1>Buscaminas</h1>
-      <div class="tabs" role="tablist" aria-label="Modo de juego">
-        <button type="button" class="tab" role="tab" data-mode="niveles" aria-selected="true">Niveles</button>
-        <button type="button" class="tab" role="tab" data-mode="libre" aria-selected="false">Libre</button>
+  <main class="app">
+    <header class="app__top">
+      <h1 class="app__title">Buscaminas</h1>
+      <div class="segmented" role="tablist" aria-label="Modo de juego">
+        <button type="button" class="segmented__btn is-active" role="tab" data-mode="niveles" aria-selected="true">Niveles</button>
+        <button type="button" class="segmented__btn" role="tab" data-mode="libre" aria-selected="false">Libre</button>
       </div>
     </header>
 
-    <section id="level-panel" class="panel">
-      <div id="level-list" class="levels"></div>
-      <button id="reset-progress" type="button" class="link-btn">Reiniciar progreso</button>
-    </section>
-
-    <section id="free-panel" class="panel" hidden>
-      <label for="difficulty">Dificultad</label>
-      <select id="difficulty">
-        <option value="facil">Fácil (9×9, 10 minas)</option>
-        <option value="medio">Medio (16×16, 40 minas)</option>
-        <option value="dificil">Difícil (16×30, 99 minas)</option>
-      </select>
-      <button id="new-free" type="button">Nueva partida</button>
-    </section>
-
-    <section class="hud" aria-label="Marcador">
-      <div class="hud__box">
-        <span>Minas</span>
-        <output id="mines-left">000</output>
+    <section id="level-panel" class="card">
+      <div class="card__head">
+        <h2 class="card__title">Campaña</h2>
+        <button id="reset-progress" type="button" class="btn btn--ghost btn--sm">Reiniciar progreso</button>
       </div>
-      <button id="face" type="button" aria-label="Nueva partida">🙂</button>
-      <div class="hud__box">
-        <span>Tiempo</span>
-        <output id="timer">000</output>
+      <div id="level-list" class="levels"></div>
+    </section>
+
+    <section id="free-panel" class="card card--row" hidden>
+      <div class="field">
+        <label for="difficulty">Dificultad</label>
+        <select id="difficulty">
+          <option value="facil">Fácil · 9×9 · 10 minas</option>
+          <option value="medio">Medio · 16×16 · 40 minas</option>
+          <option value="dificil">Difícil · 16×30 · 99 minas</option>
+        </select>
+      </div>
+      <button id="new-free" type="button" class="btn btn--primary">Nueva partida</button>
+    </section>
+
+    <section class="scoreboard" aria-label="Marcador">
+      <div class="scoreboard__box">
+        <span class="scoreboard__label">Minas</span>
+        <output id="mines-left" class="scoreboard__value">000</output>
+      </div>
+      <button id="face" type="button" class="face" aria-label="Nueva partida">🙂</button>
+      <div class="scoreboard__box">
+        <span class="scoreboard__label">Tiempo</span>
+        <output id="timer" class="scoreboard__value">000</output>
       </div>
     </section>
 
@@ -52,18 +57,20 @@
     <p id="message" class="message" aria-live="polite"></p>
 
     <div class="controls">
-      <button id="flag-toggle" type="button" aria-pressed="false">Modo bandera: inactivo</button>
-      <button id="restart" type="button">Reiniciar</button>
+      <button id="flag-toggle" type="button" class="btn btn--ghost" aria-pressed="false">🚩 Modo bandera: inactivo</button>
+      <button id="restart" type="button" class="btn">Reiniciar</button>
     </div>
+
+    <p class="hint">Clic izquierdo para descubrir · Clic derecho o tecla F para bandera · Clic en un número para despejar vecinas</p>
   </main>
 
   <div id="overlay" class="overlay" hidden>
     <div class="overlay__card" role="dialog" aria-modal="true" aria-labelledby="overlay-title">
-      <h2 id="overlay-title"></h2>
-      <p id="overlay-text"></p>
+      <h2 id="overlay-title" class="overlay__title"></h2>
+      <p id="overlay-text" class="overlay__text"></p>
       <div class="overlay__actions">
-        <button id="overlay-primary" type="button"></button>
-        <button id="overlay-close" type="button" class="btn-ghost">Cerrar</button>
+        <button id="overlay-primary" type="button" class="btn btn--primary"></button>
+        <button id="overlay-close" type="button" class="btn btn--ghost">Cerrar</button>
       </div>
     </div>
   </div>
