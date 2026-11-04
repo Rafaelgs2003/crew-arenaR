@@ -275,6 +275,22 @@ select {
 
 .face:hover { box-shadow: 0 0 0 4px var(--gold-soft); }
 .face:active { transform: scale(0.9); }
+.face--won { animation: face-bounce 0.6s ease; color: #5fd38a; }
+.face--lost { animation: face-shake 0.5s ease; color: var(--danger); }
+
+@keyframes face-bounce {
+  0%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-8px) scale(1.08); }
+  60% { transform: translateY(0) scale(0.98); }
+}
+
+@keyframes face-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
 
 .info {
   margin: 0;
@@ -346,8 +362,30 @@ select {
 }
 
 .cell--mine { background: var(--danger-soft); }
-.cell--hit { background: var(--danger); color: #fff; }
+.cell--hit {
+  background: var(--danger);
+  color: #fff;
+  animation: boom 0.45s ease both;
+}
 .cell--wrong { background: var(--danger-soft); color: var(--danger); }
+
+/* Aparición en cascada de las casillas al abrirse (onda desde el clic). */
+.cell--reveal {
+  animation: reveal-pop 0.26s ease both;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+
+@keyframes reveal-pop {
+  0% { transform: scale(0.4); opacity: 0; }
+  60% { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+@keyframes boom {
+  0% { transform: scale(0.6); }
+  50% { transform: scale(1.25); box-shadow: 0 0 22px var(--danger); }
+  100% { transform: scale(1); }
+}
 
 .n1 { color: #6ea8ff; }
 .n2 { color: #5fd38a; }
@@ -452,6 +490,77 @@ select {
 }
 
 .tip strong { color: var(--gold); font-weight: 700; }
+
+/* Estrellas del overlay de resultado */
+.stars {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.star {
+  font-size: 2.6rem;
+  line-height: 1;
+  transform: scale(0);
+}
+
+.star--on {
+  color: var(--gold);
+  text-shadow: 0 0 16px rgba(212, 175, 106, 0.6);
+  animation: star-pop 0.4s ease forwards;
+  animation-delay: var(--d, 0s);
+}
+
+.star--off {
+  color: var(--surface-3);
+  transform: scale(1);
+}
+
+@keyframes star-pop {
+  0% { transform: scale(0) rotate(-30deg); opacity: 0; }
+  70% { transform: scale(1.25) rotate(8deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); }
+}
+
+.result__line { margin: 0.3rem 0; color: var(--muted); }
+.result__line strong { color: var(--ink); }
+
+.result__badge {
+  display: inline-block;
+  margin-left: 0.3rem;
+  padding: 0.08rem 0.5rem;
+  border-radius: 999px;
+  background: var(--gold-soft);
+  color: var(--gold);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Totales del panel de campaña */
+.totals {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.totals__item {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--gold);
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--gold-line);
+  border-radius: 999px;
+  background: var(--gold-soft);
+}
+
+/* Estrellas en cada tarjeta de nivel */
+.level__stars {
+  letter-spacing: 0.12em;
+  color: var(--gold);
+}
 
 .overlay__actions {
   display: flex;

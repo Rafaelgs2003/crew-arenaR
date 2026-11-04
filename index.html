@@ -19,7 +19,11 @@
     <section id="level-panel" class="card">
       <div class="card__head">
         <h2 class="card__title">Campaña</h2>
-        <button id="reset-progress" type="button" class="btn btn--ghost btn--sm">Reiniciar progreso</button>
+        <div class="totals">
+          <span id="total-stars" class="totals__item">★ 0/30</span>
+          <span id="total-score" class="totals__item">0 pts</span>
+          <button id="reset-progress" type="button" class="btn btn--ghost btn--sm">Reiniciar progreso</button>
+        </div>
       </div>
       <div id="level-list" class="levels"></div>
     </section>
