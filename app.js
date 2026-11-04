@@ -32,7 +32,7 @@
     face: $("face"),
     info: $("info"),
     message: $("message"),
-    tabs: document.querySelectorAll(".tab"),
+    tabs: document.querySelectorAll(".segmented__btn"),
     levelPanel: $("level-panel"),
     levelList: $("level-list"),
     resetProgress: $("reset-progress"),
@@ -133,7 +133,7 @@
       if (!excluded.has(i)) pool.push(i);
     }
     // Selección aleatoria sin repetición (Fisher-Yates parcial).
-    for (let k = 0; k < g.mines; k++) {
+    for (let k = 0; k < g.mines && k < pool.length; k++) {
       const j = k + Math.floor(Math.random() * (pool.length - k));
       [pool[k], pool[j]] = [pool[j], pool[k]];
       g.mine[pool[k]] = 1;
@@ -226,13 +226,14 @@
 
   function startTimer(g) {
     g.startTime = Date.now();
+    clearInterval(state.timerId);
     state.timerId = setInterval(renderHud, 250);
   }
 
   function stopTimer(g) {
     clearInterval(state.timerId);
     state.timerId = null;
-    if (g.startTime) g.elapsed = elapsedSeconds(g);
+    if (g && g.startTime) g.elapsed = elapsedSeconds(g);
   }
 
   /* ---------- Flujo de partida ---------- */
@@ -257,7 +258,7 @@
   }
 
   function startGame(cfg, meta) {
-    stopTimer(state.game ?? { startTime: 0 });
+    stopTimer(state.game);
     state.game = createGame(cfg, meta);
     hideOverlay();
     buildBoard();
@@ -286,7 +287,11 @@
 
   function setMode(mode) {
     if (mode === state.mode) return;
-    ui.tabs.forEach((t) => t.setAttribute("aria-selected", String(t.dataset.mode === mode)));
+    ui.tabs.forEach((t) => {
+      const on = t.dataset.mode === mode;
+      t.classList.toggle("is-active", on);
+      t.setAttribute("aria-selected", String(on));
+    });
     ui.levelPanel.hidden = mode !== "niveles";
     ui.freePanel.hidden = mode !== "libre";
     if (mode === "niveles") startLevel(state.level);
@@ -310,14 +315,14 @@
       renderLevelPicker();
       const time = `Tiempo: ${g.elapsed} s`;
       if (g.levelNo && g.levelNo < LEVELS.length) {
-        showOverlay("¡Nivel superado!", time, "Siguiente nivel", () => startLevel(g.levelNo + 1));
+        showOverlay("🎉 ¡Nivel superado!", time, "Siguiente nivel", () => startLevel(g.levelNo + 1));
       } else if (g.levelNo) {
-        showOverlay("¡Campaña completada!", time, "Jugar este nivel otra vez", restartCurrent);
+        showOverlay("🏆 ¡Campaña completada!", time, "Jugar otra vez", restartCurrent);
       } else {
-        showOverlay("¡Tablero despejado!", time, "Nueva partida", startFree);
+        showOverlay("🎉 ¡Tablero despejado!", time, "Nueva partida", startFree);
       }
     } else {
-      showOverlay("Has pisado una mina", "Inténtalo de nuevo.", "Reintentar", restartCurrent);
+      showOverlay("💥 Has pisado una mina", "Inténtalo de nuevo.", "Reintentar", restartCurrent);
     }
   }
 
@@ -326,7 +331,8 @@
   function buildBoard() {
     const g = state.game;
     ui.board.innerHTML = "";
-    ui.board.style.gridTemplateColumns = `repeat(${g.cols}, var(--cell))`;
+    ui.board.style.gridTemplateColumns = `repeat(${g.cols}, var(--cell-size))`;
+    ui.board.style.gridTemplateRows = `repeat(${g.rows}, var(--cell-size))`;
     const frag = document.createDocumentFragment();
     for (let i = 0; i < g.total; i++) {
       const cell = document.createElement("button");
@@ -340,9 +346,9 @@
 
   function applyCellSize() {
     const g = state.game;
-    const available = Math.min(window.innerWidth, 900) - 64;
-    const size = Math.max(20, Math.min(36, Math.floor(available / g.cols)));
-    ui.board.style.setProperty("--cell", `${size}px`);
+    const available = Math.min(window.innerWidth, 720) - 48;
+    const size = Math.max(22, Math.min(38, Math.floor(available / g.cols) - 3));
+    ui.board.style.setProperty("--cell-size", `${size}px`);
   }
 
   function renderCell(g, i) {
@@ -383,16 +389,17 @@
   }
 
   function messageFor(g) {
-    if (g.state === "won") return "Has despejado el tablero.";
+    if (g.state === "won") return "¡Has despejado el tablero!";
     if (g.state === "lost") return "Has pisado una mina.";
-    return "Clic izquierdo para descubrir. Clic derecho o tecla F para marcar bandera.";
+    return "";
   }
 
   function renderHud() {
     const g = state.game;
+    if (!g) return;
     if (g.state === "playing" && g.startTime) g.elapsed = elapsedSeconds(g);
 
-    ui.minesLeft.textContent = String(g.mines - countFlags(g)).padStart(3, "0");
+    ui.minesLeft.textContent = String(Math.max(0, g.mines - countFlags(g))).padStart(3, "0");
     ui.timer.textContent = String(Math.min(g.elapsed, 999)).padStart(3, "0");
     ui.face.textContent = g.state === "won" ? "😎" : g.state === "lost" ? "😵" : "🙂";
     ui.message.textContent = messageFor(g);
@@ -408,8 +415,9 @@
     for (let i = 0; i < g.total; i++) renderCell(g, i);
     renderHud();
     ui.flagToggle.setAttribute("aria-pressed", String(state.flagMode));
-    ui.flagToggle.textContent = state.flagMode ? "Modo bandera: activo" : "Modo bandera: inactivo";
-    ui.flagToggle.classList.toggle("is-active", state.flagMode);
+    ui.flagToggle.textContent = state.flagMode
+      ? "🚩 Modo bandera: activo"
+      : "🚩 Modo bandera: inactivo";
   }
 
   function renderLevelPicker() {
@@ -436,7 +444,7 @@
       const best = state.progress.best[`nivel-${n}`];
       if (best !== undefined) {
         const bestEl = document.createElement("small");
-        bestEl.textContent = `Mejor: ${best} s`;
+        bestEl.textContent = `⏱ Mejor: ${best} s`;
         btn.appendChild(bestEl);
       }
 
