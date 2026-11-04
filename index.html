@@ -3,38 +3,70 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lista de tareas</title>
+  <title>Buscaminas</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="app">
-    <header class="app__header">
-      <h1>Mis tareas</h1>
-      <p class="app__counter" id="counter">0 pendientes</p>
+  <main class="game">
+    <header class="game__header">
+      <h1>Buscaminas</h1>
+      <div class="tabs" role="tablist" aria-label="Modo de juego">
+        <button type="button" class="tab" role="tab" data-mode="niveles" aria-selected="true">Niveles</button>
+        <button type="button" class="tab" role="tab" data-mode="libre" aria-selected="false">Libre</button>
+      </div>
     </header>
 
-    <form id="task-form" class="task-form" autocomplete="off">
-      <input type="text" id="task-input" placeholder="Escribe una nueva tarea…" maxlength="200" required>
-      <button type="submit">Añadir</button>
-    </form>
+    <section id="level-panel" class="panel">
+      <div id="level-list" class="levels"></div>
+      <button id="reset-progress" type="button" class="link-btn">Reiniciar progreso</button>
+    </section>
 
-    <details class="filters">
-      <summary>Filtrar tareas</summary>
-      <div class="filters__options" role="radiogroup" aria-label="Filtro de tareas">
-        <label><input type="radio" name="filter" value="all" checked> Todas</label>
-        <label><input type="radio" name="filter" value="pending"> Pendientes</label>
-        <label><input type="radio" name="filter" value="done"> Completadas</label>
+    <section id="free-panel" class="panel" hidden>
+      <label for="difficulty">Dificultad</label>
+      <select id="difficulty">
+        <option value="facil">Fácil (9×9, 10 minas)</option>
+        <option value="medio">Medio (16×16, 40 minas)</option>
+        <option value="dificil">Difícil (16×30, 99 minas)</option>
+      </select>
+      <button id="new-free" type="button">Nueva partida</button>
+    </section>
+
+    <section class="hud" aria-label="Marcador">
+      <div class="hud__box">
+        <span>Minas</span>
+        <output id="mines-left">000</output>
       </div>
-    </details>
+      <button id="face" type="button" aria-label="Nueva partida">🙂</button>
+      <div class="hud__box">
+        <span>Tiempo</span>
+        <output id="timer">000</output>
+      </div>
+    </section>
 
-    <ul id="task-list" class="task-list" aria-live="polite"></ul>
+    <p id="info" class="info"></p>
 
-    <p id="empty-message" class="empty" hidden>No hay tareas aquí todavía.</p>
+    <div class="board-wrap">
+      <div id="board" class="board" role="group" aria-label="Tablero de juego"></div>
+    </div>
 
-    <footer class="app__footer">
-      <button type="button" id="clear-done">Borrar completadas</button>
-    </footer>
+    <p id="message" class="message" aria-live="polite"></p>
+
+    <div class="controls">
+      <button id="flag-toggle" type="button" aria-pressed="false">Modo bandera: inactivo</button>
+      <button id="restart" type="button">Reiniciar</button>
+    </div>
   </main>
+
+  <div id="overlay" class="overlay" hidden>
+    <div class="overlay__card" role="dialog" aria-modal="true" aria-labelledby="overlay-title">
+      <h2 id="overlay-title"></h2>
+      <p id="overlay-text"></p>
+      <div class="overlay__actions">
+        <button id="overlay-primary" type="button"></button>
+        <button id="overlay-close" type="button" class="btn-ghost">Cerrar</button>
+      </div>
+    </div>
+  </div>
 
   <script src="app.js"></script>
 </body>
