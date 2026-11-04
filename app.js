@@ -3,25 +3,28 @@
 
   const PROGRESS_KEY = "buscaminas-progreso-v1";
 
-  /** Dificultades del modo libre. */
+  /** Dificultades del modo libre (tableros rectangulares, apaisados). */
   const DIFFICULTIES = {
-    facil: { label: "Fácil", rows: 9, cols: 9, mines: 10 },
-    medio: { label: "Medio", rows: 16, cols: 16, mines: 40 },
+    facil: { label: "Fácil", rows: 8, cols: 12, mines: 12 },
+    medio: { label: "Medio", rows: 12, cols: 20, mines: 45 },
     dificil: { label: "Difícil", rows: 16, cols: 30, mines: 99 },
   };
 
-  /** Niveles de la campaña: el tablero y las minas crecen con cada nivel. */
+  /**
+   * Niveles de la campaña. Los tableros son rectangulares (más anchos que
+   * altos) para aprovechar el ancho de la pantalla y evitar el scroll vertical.
+   */
   const LEVELS = [
-    { rows: 8, cols: 8, mines: 8 },
-    { rows: 8, cols: 8, mines: 10 },
-    { rows: 9, cols: 9, mines: 12 },
-    { rows: 10, cols: 10, mines: 15 },
-    { rows: 10, cols: 10, mines: 18 },
-    { rows: 12, cols: 12, mines: 22 },
-    { rows: 12, cols: 12, mines: 26 },
-    { rows: 14, cols: 14, mines: 32 },
-    { rows: 15, cols: 15, mines: 38 },
-    { rows: 16, cols: 16, mines: 45 },
+    { rows: 7, cols: 10, mines: 9 },
+    { rows: 8, cols: 12, mines: 14 },
+    { rows: 9, cols: 14, mines: 20 },
+    { rows: 9, cols: 16, mines: 26 },
+    { rows: 10, cols: 18, mines: 33 },
+    { rows: 11, cols: 20, mines: 42 },
+    { rows: 11, cols: 22, mines: 50 },
+    { rows: 12, cols: 24, mines: 60 },
+    { rows: 13, cols: 26, mines: 72 },
+    { rows: 14, cols: 30, mines: 90 },
   ];
 
   const $ = (id) => document.getElementById(id);
@@ -344,10 +347,29 @@
     ui.board.appendChild(frag);
   }
 
+  /**
+   * Calcula el tamaño de celda para que el tablero completo quepa en la
+   * ventana sin necesidad de scroll, limitándose tanto por el ancho
+   * disponible como por el alto que dejan libre el resto de secciones.
+   */
   function applyCellSize() {
     const g = state.game;
-    const available = Math.min(window.innerWidth, 720) - 48;
-    const size = Math.max(22, Math.min(38, Math.floor(available / g.cols) - 3));
+    const GAP = 3; // separación entre celdas (coincide con el CSS)
+
+    // Ancho disponible: ancho de la ventana menos los márgenes y el padding
+    // del contenedor del tablero.
+    const widthAvail = Math.min(window.innerWidth, 1100) - 48;
+
+    // Alto disponible: lo que queda de la ventana tras descontar el espacio
+    // aproximado que ocupan cabecera, paneles, marcador y controles.
+    const heightAvail = Math.max(240, window.innerHeight - 360);
+
+    const byWidth = Math.floor((widthAvail - (g.cols - 1) * GAP) / g.cols);
+    const byHeight = Math.floor((heightAvail - (g.rows - 1) * GAP) / g.rows);
+
+    // Elegimos el menor de los dos para que no se desborde por ningún eje,
+    // acotado entre un mínimo legible y un máximo cómodo.
+    const size = Math.max(16, Math.min(40, byWidth, byHeight));
     ui.board.style.setProperty("--cell-size", `${size}px`);
   }
 
