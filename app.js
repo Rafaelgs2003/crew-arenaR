@@ -30,6 +30,7 @@
   const $ = (id) => document.getElementById(id);
   const ui = {
     board: $("board"),
+    boardWrap: document.querySelector(".board-wrap"),
     minesLeft: $("mines-left"),
     timer: $("timer"),
     face: $("face"),
@@ -356,20 +357,22 @@
     const g = state.game;
     const GAP = 3; // separación entre celdas (coincide con el CSS)
 
-    // Ancho disponible: ancho de la ventana menos los márgenes y el padding
-    // del contenedor del tablero.
-    const widthAvail = Math.min(window.innerWidth, 1100) - 48;
+    // Ancho real disponible: el ancho interior del contenedor del tablero
+    // (ya descuenta su propio padding), medido del DOM para no depender de
+    // constantes frágiles. Así nunca aparece scroll horizontal.
+    const widthAvail = ui.boardWrap.clientWidth - 2;
 
     // Alto disponible: lo que queda de la ventana tras descontar el espacio
     // aproximado que ocupan cabecera, paneles, marcador y controles.
-    const heightAvail = Math.max(240, window.innerHeight - 360);
+    const heightAvail = Math.max(200, window.innerHeight - 360);
 
     const byWidth = Math.floor((widthAvail - (g.cols - 1) * GAP) / g.cols);
     const byHeight = Math.floor((heightAvail - (g.rows - 1) * GAP) / g.rows);
 
-    // Elegimos el menor de los dos para que no se desborde por ningún eje,
-    // acotado entre un mínimo legible y un máximo cómodo.
-    const size = Math.max(16, Math.min(40, byWidth, byHeight));
+    // Elegimos el menor de los dos para que no se desborde por ningún eje.
+    // El mínimo es 1px para garantizar que siempre cabe aunque la pantalla
+    // sea muy estrecha; el máximo cómodo es 40px.
+    const size = Math.max(1, Math.min(40, byWidth, byHeight));
     ui.board.style.setProperty("--cell-size", `${size}px`);
   }
 
