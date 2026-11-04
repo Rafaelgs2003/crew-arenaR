@@ -319,14 +319,26 @@
       renderLevelPicker();
       const time = `Tiempo: ${g.elapsed} s`;
       if (g.levelNo && g.levelNo < LEVELS.length) {
-        showOverlay("🎉 ¡Nivel superado!", time, "Siguiente nivel", () => startLevel(g.levelNo + 1));
+        showOverlay("Nivel superado", time, "Siguiente nivel", () => startLevel(g.levelNo + 1));
       } else if (g.levelNo) {
-        showOverlay("🏆 ¡Campaña completada!", time, "Jugar otra vez", restartCurrent);
+        showOverlay("Campaña completada", time, "Jugar otra vez", restartCurrent);
       } else {
-        showOverlay("🎉 ¡Tablero despejado!", time, "Nueva partida", startFree);
+        showOverlay("Tablero despejado", time, "Nueva partida", startFree);
       }
+    } else if (g.levelNo === 1) {
+      // Pista didáctica la primera vez que se juega (nivel 1).
+      const tip = `
+        <span class="tip__lead">Aprende a jugar:</span>
+        <ul class="tip">
+          <li>Cada número dice <strong>cuántas minas</strong> tocan esa casilla.</li>
+          <li>Un <strong>1</strong> con una sola casilla oculta al lado: ahí está la mina.</li>
+          <li>Marca las minas con una bandera <strong>⚑</strong> (clic derecho o tecla F).</li>
+          <li>Si todas las minas de un número ya están marcadas, haz clic en el número para abrir el resto.</li>
+          <li>El <strong>primer clic nunca es una mina</strong>, así que empieza por el centro.</li>
+        </ul>`;
+      showOverlay("¡Mina!", tip, "Reintentar", restartCurrent, { html: true });
     } else {
-      showOverlay("💥 Has pisado una mina", "Inténtalo de nuevo.", "Reintentar", restartCurrent);
+      showOverlay("Has pisado una mina", "Inténtalo de nuevo.", "Reintentar", restartCurrent);
     }
   }
 
@@ -356,10 +368,11 @@
   function applyCellSize() {
     const g = state.game;
     const GAP = 3; // separación entre celdas (coincide con el CSS)
+    const MIN = 26; // tamaño mínimo legible de celda
+    const MAX = 40; // tamaño máximo cómodo
 
-    // Ancho real disponible: el ancho interior del contenedor del tablero
-    // (ya descuenta su propio padding), medido del DOM para no depender de
-    // constantes frágiles. Así nunca aparece scroll horizontal.
+    // Ancho real disponible: el ancho interior del contenedor del tablero,
+    // medido del DOM para no depender de constantes frágiles.
     const widthAvail = ui.boardWrap.clientWidth - 2;
 
     // Alto disponible: lo que queda de la ventana tras descontar el espacio
@@ -369,11 +382,16 @@
     const byWidth = Math.floor((widthAvail - (g.cols - 1) * GAP) / g.cols);
     const byHeight = Math.floor((heightAvail - (g.rows - 1) * GAP) / g.rows);
 
-    // Elegimos el menor de los dos para que no se desborde por ningún eje.
-    // El mínimo es 1px para garantizar que siempre cabe aunque la pantalla
-    // sea muy estrecha; el máximo cómodo es 40px.
-    const size = Math.max(1, Math.min(40, byWidth, byHeight));
+    // Tamaño ideal para que quepa sin scroll, pero nunca por debajo del
+    // mínimo legible: preferimos celdas cómodas y, si no caben, permitimos
+    // scroll sólo en ese caso extremo.
+    const size = Math.min(MAX, Math.max(MIN, Math.min(byWidth, byHeight)));
     ui.board.style.setProperty("--cell-size", `${size}px`);
+
+    // Activa el desplazamiento del contenedor únicamente cuando el tablero,
+    // al tamaño mínimo legible, no cabe en el ancho disponible.
+    const boardWidth = g.cols * size + (g.cols - 1) * GAP;
+    ui.boardWrap.classList.toggle("is-scrollable", boardWidth > widthAvail);
   }
 
   function renderCell(g, i) {
@@ -388,7 +406,7 @@
       cls += " cell--open";
       if (g.mine[i]) {
         cls += i === g.hitIndex ? " cell--hit" : " cell--mine";
-        text = "💣";
+        text = "✱";
         desc = "mina";
       } else if (g.count[i]) {
         cls += ` n${g.count[i]}`;
@@ -403,7 +421,7 @@
         text = "✖";
         desc = "bandera incorrecta";
       } else {
-        text = "🚩";
+        text = "⚑";
         desc = "bandera";
       }
     }
@@ -426,7 +444,7 @@
 
     ui.minesLeft.textContent = String(Math.max(0, g.mines - countFlags(g))).padStart(3, "0");
     ui.timer.textContent = String(Math.min(g.elapsed, 999)).padStart(3, "0");
-    ui.face.textContent = g.state === "won" ? "😎" : g.state === "lost" ? "😵" : "🙂";
+    ui.face.textContent = g.state === "won" ? "B-)" : g.state === "lost" ? "x_x" : "·‿·";
     ui.message.textContent = messageFor(g);
 
     const best = state.progress.best[g.bestKey];
@@ -441,8 +459,8 @@
     renderHud();
     ui.flagToggle.setAttribute("aria-pressed", String(state.flagMode));
     ui.flagToggle.textContent = state.flagMode
-      ? "🚩 Modo bandera: activo"
-      : "🚩 Modo bandera: inactivo";
+      ? "⚑ Modo bandera: activo"
+      : "⚑ Modo bandera: inactivo";
   }
 
   function renderLevelPicker() {
@@ -459,7 +477,7 @@
       if (current) btn.setAttribute("aria-current", "true");
 
       const title = document.createElement("strong");
-      title.textContent = locked ? `🔒 Nivel ${n}` : `Nivel ${n}`;
+      title.textContent = locked ? `Nivel ${n} (bloqueado)` : `Nivel ${n}`;
 
       const info = document.createElement("small");
       info.textContent = `${cfg.cols}×${cfg.rows} · ${cfg.mines} minas`;
@@ -469,7 +487,7 @@
       const best = state.progress.best[`nivel-${n}`];
       if (best !== undefined) {
         const bestEl = document.createElement("small");
-        bestEl.textContent = `⏱ Mejor: ${best} s`;
+        bestEl.textContent = `Mejor: ${best} s`;
         btn.appendChild(bestEl);
       }
 
@@ -480,9 +498,18 @@
 
   /* ---------- Ventana de resultado ---------- */
 
-  function showOverlay(title, text, label, action) {
+  /**
+   * Muestra la ventana de resultado. Si `opts.html` es true, `text` se
+   * interpreta como HTML (contenido fijo definido en el propio código, nunca
+   * entrada del usuario), lo que permite pistas con varias líneas.
+   */
+  function showOverlay(title, text, label, action, opts = {}) {
     ui.overlayTitle.textContent = title;
-    ui.overlayText.textContent = text;
+    if (opts.html) {
+      ui.overlayText.innerHTML = text;
+    } else {
+      ui.overlayText.textContent = text;
+    }
     ui.overlayPrimary.textContent = label;
     state.overlayAction = action;
     ui.overlay.hidden = false;

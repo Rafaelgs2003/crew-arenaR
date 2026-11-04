@@ -257,11 +257,16 @@ select {
 }
 
 .face {
-  font-size: 1.7rem;
+  font-family: "SFMono-Regular", Consolas, "Courier New", monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
   line-height: 1;
-  width: 56px;
+  color: var(--gold);
+  min-width: 56px;
   height: 56px;
-  border-radius: 50%;
+  padding: 0 0.6rem;
+  border-radius: 14px;
   border: 1px solid var(--line-strong);
   background: var(--surface-3);
   cursor: pointer;
@@ -283,12 +288,24 @@ select {
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;           /* nunca scroll: la celda se ajusta por JS */
+  overflow: hidden;           /* por defecto sin scroll: la celda se ajusta por JS */
   padding: 0.8rem;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
+}
+
+/* Sólo cuando el tablero no cabe al tamaño mínimo legible de celda. */
+.board-wrap.is-scrollable {
+  overflow-x: auto;
+  justify-content: flex-start;
+}
+
+.board-wrap.is-scrollable::-webkit-scrollbar { height: 10px; }
+.board-wrap.is-scrollable::-webkit-scrollbar-thumb {
+  background: var(--surface-3);
+  border-radius: 6px;
 }
 
 .board {
@@ -398,6 +415,43 @@ select {
 
 .overlay__title { margin: 0 0 0.5rem; font-size: 1.5rem; color: var(--gold); }
 .overlay__text { margin: 0 0 1.6rem; color: var(--muted); }
+
+.tip__lead {
+  display: block;
+  margin-bottom: 0.6rem;
+  color: var(--gold);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+
+.tip {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.tip li {
+  position: relative;
+  padding-left: 1.4rem;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+.tip li::before {
+  content: "▸";
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+}
+
+.tip strong { color: var(--gold); font-weight: 700; }
 
 .overlay__actions {
   display: flex;
